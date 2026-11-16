@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pedro rocha (•̀ᴗ•́)و</title>
+<meta name="description" content="pedro rocha: estudante de estatística na ence/ibge, rio de janeiro. dados, automação e ia generativa.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath transform='translate(-.5 -.5)' fill='%23C6613F' d='M2 1.5 14.2 6.6a.7.7 0 0 1-.06 1.32L9.2 9.4a.7.7 0 0 0-.46.46l-1.5 4.9a.7.7 0 0 1-1.32.05z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#2a282c;--ink:#d4d3d9;--dim:#9a98a1;--edge:#141316;--accent:#c6613f}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--edge);overflow:hidden;font-family:'Libre Franklin',system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#frame{position:fixed;inset:10px;border-radius:6px;overflow:hidden;background:var(--bg)}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 50%,rgba(0,0,0,.5) 100%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.6),inset 0 0 40px rgba(0,0,0,.5)}
+button{font-family:inherit}
+.lbl,.plbl{position:absolute;left:0;top:0;font-size:13.5px;font-weight:500;color:var(--ink);background:none;border:0;cursor:pointer;white-space:nowrap;padding:3px 4px;letter-spacing:.01em;opacity:0;will-change:transform}
+.lbl:hover,.lbl.on,.plbl:hover,.plbl.on{color:#fff;text-decoration:underline wavy rgba(212,211,217,.55) 1px;text-underline-offset:5px}
+.lbl:focus-visible,.plbl:focus-visible,a:focus-visible,.back:focus-visible{outline:1px dashed var(--ink);outline-offset:3px}
+.plbl{font-size:12.5px}
+.panel{position:absolute;top:50%;left:0;max-width:360px;font-size:14.5px;line-height:1.65;opacity:0;pointer-events:none;transform:translateY(-46%);transition:opacity .7s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
+.panel.on{opacity:1;pointer-events:auto;transform:translateY(-50%);transition-delay:.35s}
+.panel p{margin-bottom:13px}
+.panel a{color:var(--ink);text-decoration:underline;text-decoration-style:wavy;text-decoration-color:rgba(198,97,63,.8);text-decoration-thickness:1px;text-underline-offset:4px}
+.panel a:hover{color:#fff}
+.panel .u{text-decoration:underline;text-decoration-color:rgba(212,211,217,.45);text-underline-offset:4px}
+.panel .small{font-size:12.5px;color:var(--dim)}
+#p-sobre{display:flex;gap:56px;align-items:center;max-width:none}
+#p-sobre .txt{max-width:330px}
+.photos{position:relative;width:270px;height:300px;flex:none}
+.ph{position:absolute;width:150px;height:185px;background:#353338;border:1px dashed #6f6d75;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim);box-shadow:0 8px 22px rgba(0,0,0,.4);transition:transform .4s ease}
+.ph:hover{transform:rotate(0deg) scale(1.04)!important;z-index:5}
+.ph img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) contrast(1.4) brightness(1.05)}
+.ph::before{content:'';position:absolute;top:-9px;left:50%;width:56px;height:17px;transform:translateX(-50%) rotate(-5deg);background:rgba(222,220,228,.3)}
+.ph .cap{position:absolute;bottom:-21px;left:2px;font-size:10.5px;color:var(--dim);white-space:nowrap}
+.ph:nth-child(1){left:0;top:0;transform:rotate(-6deg)}
+.ph:nth-child(2){left:110px;top:30px;transform:rotate(5deg)}
+.ph:nth-child(3){left:40px;top:120px;transform:rotate(-2deg)}
+#pcard{position:absolute;left:0;top:0;width:250px;font-size:13px;line-height:1.55;padding:12px 14px;background:rgba(36,34,38,.92);border:1px solid rgba(212,211,217,.18);border-radius:4px;opacity:0;pointer-events:none;transition:opacity .3s}
+#pcard.on{opacity:1;pointer-events:auto}
+#pcard b{display:block;font-weight:700;margin-bottom:4px}
+#pcard a{display:inline-block;margin-top:8px;color:var(--ink);text-decoration:underline wavy rgba(198,97,63,.8) 1px;text-underline-offset:4px}
+.plbl.txt{cursor:default;color:var(--dim);text-decoration:none!important}
+.back{position:absolute;left:22px;bottom:20px;background:var(--ink);color:var(--bg);border:0;border-radius:12px;padding:2px 12px 3px;font-size:16px;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .4s}
+.back.on{opacity:1;pointer-events:auto}
+#player{position:absolute;right:22px;bottom:18px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+#hint{font-size:11.5px;line-height:1.3;color:var(--dim);display:flex;gap:6px;align-items:flex-start;margin-left:14px;opacity:0;transition:opacity .6s}
+#hint.on{opacity:1}
+.pill{position:relative;display:flex;align-items:center;gap:8px;width:300px;height:26px;padding:0 10px;border-radius:13px;background:var(--ink);color:var(--bg);font-size:12.5px;font-weight:500;overflow:hidden}
+.pill button,.pill a{background:none;border:0;color:var(--bg);cursor:pointer;display:flex;align-items:center;padding:0;text-decoration:none;flex:none}
+.pill #mtitle{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill i{position:absolute;left:0;bottom:0;height:2px;width:0;background:rgba(42,40,44,.45)}
+@media (max-width:760px){
+  .panel,#p-sobre{left:14px!important;right:14px;top:16%!important;max-width:none;transform:translateY(8px);background:rgba(42,40,44,.86);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);padding:16px 18px;border-radius:6px;font-size:14px}
+  .panel.on{transform:none}
+  #p-sobre{flex-direction:column;gap:28px;align-items:flex-start;max-height:74%;overflow:auto}
+  .photos{transform:scale(.8);transform-origin:left top;height:250px}
+  .lbl{font-size:12.5px}
+  #hint{display:none}
+  .pill{width:220px}
+  #player{right:14px;bottom:14px}
+}
+@media (prefers-reduced-motion:reduce){.panel,.panel.on{transition:opacity .3s}}
+</style>
+</head>
+<body>
+<div id="frame">
+  <canvas id="c" aria-hidden="true"></canvas>
+  <div id="vignette"></div>
+
+  <button class="lbl" data-k="contato">trabalhe comigo</button>
+  <button class="lbl" data-k="projetos">projetos</button>
+  <button class="lbl" data-k="formacao">formação</button>
+  <button class="lbl" data-k="sobre">sobre mim</button>
+
+  <section class="panel" id="p-sobre" aria-label="sobre mim">
+    <div class="txt">
+      <p>sou o pedro rocha. estudante de <span class="u">estatística</span>, moro em guaratiba, no rio de janeiro.</p>
+      <p>trabalho na <span class="u">fgv dgpe</span>, na coordenação de planejamento. lá eu monto apps, painéis e automações na monday para acompanhar projetos e equipes.</p>
+      <p>me interesso por <span class="u">ciência de dados</span>, ia generativa e automação de tarefas repetitivas.</p>
+      <br>
+      <p>me encontre no <a href="#" data-link="linkedin">linkedin</a> e no <a href="#" data-link="github">github</a>.</p>
+    </div>
+    <div class="photos" id="photos"></div>
+  </section>
+
+  <section class="panel" id="p-formacao" aria-label="formação">
+    <p>bacharelado em <span class="u">estatística</span> na ence/ibge. comecei em 2023 e a conclusão está prevista para 2028.</p>
+    <p>meu foco tem sido ciência de dados e ia generativa.</p>
+    <p>a parte prática vem do estágio na fgv dgpe, onde os dados dos projetos viram painéis e apps.</p>
+    <p class="small">ence: escola nacional de ciências estatísticas.</p>
+  </section>
+
+  <section class="panel" id="p-contato" aria-label="trabalhe comigo">
+    <p>quer conversar sobre dados, automação, inteligência artificial ou algum projeto?</p>
+    <p>me chama no <a href="#" data-link="linkedin">linkedin</a> ou dá uma olhada no meu <a href="#" data-link="github">github</a>.</p>
+  </section>
+
+  <section class="panel" id="p-projetos" aria-label="projetos">
+    <p class="small">algumas coisas que construí. clique num galho.</p>
+  </section>
+
+  <div id="pcard" role="status"><b></b><span></span><br><a target="_blank" rel="noopener">ver no github ↗</a></div>
+
+  <button class="back" aria-label="voltar">↩</button>
+  <div id="player">
+    <div id="hint">
+      <svg width="12" height="22" viewBox="0 0 12 22" fill="none" stroke="#9a98a1" stroke-width="1.1" stroke-linecap="round"><path d="M8 2C2 6 2 14 5 20"/><path d="M2.2 17.5 5 20.6 7.8 17.6"/></svg>
+      <span>talvez você me conheça melhor<br>se ouvir o que eu gosto!</span>
+    </div>
+    <div class="pill">
+      <button id="mplay" aria-label="tocar"><svg width="10" height="11" viewBox="0 0 10 11"><path id="mico" d="M1 .5v10l8.5-5z" fill="currentColor"/></svg></button>
+      <span id="mtitle"></span>
+      <a id="mlink" target="_blank" rel="noopener" aria-label="ouvir a música completa"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 8 8 2M3.5 2H8v4.5"/></svg></a>
+      <button id="mnext" aria-label="próxima"><svg width="11" height="10" viewBox="0 0 11 10"><path d="M0 0v10l7-5z M8 0h2v10H8z" fill="currentColor"/></svg></button>
+      <i id="mbar"></i>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ========= conteúdo editável ========= */
+// links: troque o "#" pelos seus endereços
+const LINKS = { linkedin: '#', github: '#' };
+
+// fotos: coloque o arquivo ao lado do index.html (ex.: 'fotos/eu.jpg') ou um data URI
+const FOTOS = [
+  { src: '', legenda: 'legenda da foto 1' },
+  { src: '', legenda: 'legenda da foto 2' },
+  { src: '', legenda: 'legenda da foto 3' }
+];
+
+// itens sem url aparecem como texto simples, sem clique
+const PROJETOS = [
+  { nome: 'ibge rag chatbot', url: 'https://github.com/justmetro/ibge-rag-chatbot', desc: 'chatbot que responde perguntas sobre indicadores sociais brasileiros usando tabelas públicas do ibge, busca semântica e rag. python, langchain e streamlit.' },
+  { nome: 'rendimento predictor', url: 'https://github.com/justmetro/rendimento-predictor-api', desc: 'api e front para prever o rendimento por hora a partir de dados sociodemográficos, com microdados da pnad contínua e xgboost. fastapi e streamlit.' },
+  { nome: 'api de ordens de serviço', url: 'https://github.com/justmetro/ordem-servico-api', desc: 'api rest para gerenciar ordens de serviço e chamados, com autenticação jwt, perfis de acesso, auditoria e histórico de status. java 21, spring boot e postgresql.' },
+  { nome: 'orderflow (senai)', url: 'https://github.com/CaioCunha10/orderflow-os-senai', desc: 'sistema de ordens de serviço de manutenção feito no senai maracanã: abertura, execução e finalização de cada os.' },
+  { nome: 'e outros projetos na FGV DGPE :)' }
+];
+// músicas: trechos de 30 s na pasta music/; o link abre a faixa completa
+const MUSICAS = [
+  { titulo: 'chapters of time', artista: 'melodysheep', src: 'music/chapters-of-time.m4a' },
+  { titulo: 'ether', artista: 'melodysheep', src: 'music/ether.m4a' },
+  { titulo: "hawking's waltz", artista: 'melodysheep', src: 'music/hawkings-waltz.m4a' },
+  { titulo: 'rebirth', artista: 'melodysheep', src: 'music/rebirth.m4a' },
+  { titulo: 'the good, the bad and the ugly', artista: 'the city of prague philharmonic orchestra', src: 'music/the-good-the-bad-and-the-ugly.m4a' }
+];
+/* ===================================== */
+
+const INK = '#cfced6', BG = '#2a282c';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+const frameEl = document.getElementById('frame');
+let W, H, DPR, narrow, tree, roots, branch, pulls = {}, grass, ground, stars, grain;
+let state = 'home', intro = reduce ? 1 : 0, T = 0, last = performance.now(), sel = -1;
+const cam = { x: 0, y: 0 }, tgt = { x: 0, y: 0 };
+
+function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function mk(w, h) { const c = document.createElement('canvas'); c.width = Math.ceil(w * DPR); c.height = Math.ceil(h * DPR); const g = c.getContext('2d'); g.scale(DPR, DPR); return [c, g]; }
+
+// nuvem pontilhada de folhas
+function blob(g, R, cx, cy, r, dens) {
+  const n = Math.floor(r * r * dens), ph = R() * 6.28;
+  g.fillStyle = INK;
+  for (let k = 0; k < n; k++) {
+    const a = R() * 6.283, rr = r * (0.72 + 0.28 * Math.sin(a * 5 + ph) * Math.sin(a * 3 - ph));
+    const d = Math.sqrt(R()) * rr;
+    g.globalAlpha = 0.5 + R() * 0.5;
+    const sz = R() < 0.15 ? 1.8 : 1.1;
+    g.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.82, sz, sz);
+  }
+  g.fillStyle = BG;
+  for (let k = 0; k < n * 0.1; k++) {
+    const a = R() * 6.283, d = Math.sqrt(R()) * r * 0.8;
+    g.globalAlpha = 0.6 + R() * 0.4;
+    g.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.82, 1.4, 1.4);
+  }
+  g.globalAlpha = 1;
+}
+
+function disc(g, R, cx, cy, r, dens, color, a0) {
+  const n = Math.floor(r * r * dens), ph = R() * 6.28;
+  g.fillStyle = color;
+  for (let k = 0; k < n; k++) {
+    const a = R() * 6.283, rr = r * (0.86 + 0.14 * Math.sin(a * 4 + ph) + 0.06 * Math.sin(a * 11 - ph));
+    const d = Math.sqrt(R()) * rr * 1.1;
+    if (d > rr && R() < (d - rr) / (0.1 * rr)) continue;
+    g.globalAlpha = a0 + R() * (1 - a0);
+    const sz = R() < 0.2 ? 2 : 1.4;
+    g.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d, sz, sz);
+  }
+  if (color === INK) {
+    g.fillStyle = BG;
+    for (let k = 0; k < n * 0.07; k++) { const a = R() * 6.283, d = Math.sqrt(R()) * r * 0.95; g.globalAlpha = 0.3 + R() * 0.7; g.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 1.3, 1.3); }
+  }
+  g.globalAlpha = 1;
+}
+function shade(g, R, cx, cy, r) {
+  const n = Math.floor(r * r * 0.32), a0 = 0.3 + R() * 1.0, span = 1.0 + R() * 1.2;
+  g.fillStyle = BG;
+  for (let k = 0; k < n; k++) {
+    const a = a0 + R() * span, d = r * (0.78 + Math.pow(R(), 0.6) * 0.28);
+    g.globalAlpha = 0.15 + R() * 0.6;
+    g.fillRect(cx + Math.cos(a) * d, cy + Math.sin(a) * d, 1.6, 1.6);
+  }
+  g.globalAlpha = 1;
+}
+
+function buildTree() {
+  const R = rng(7);
+  const TH = Math.max(280, Math.min(560, (H - 120) * 0.84));
+  const s = TH / 520, pad = 24, HW = TH * 0.235;
+  const cw = HW * 2.7 + pad * 2, ch = TH + 30 * s + pad * 2;
+  const [c, g] = mk(cw, ch);
+  const ox = cw / 2, oy = ch - pad;
+  g.translate(ox, oy);
+  const tx = y => Math.sin(y * 0.01) * 1.5 * s;
+  g.fillStyle = INK;
+  for (let y = 0; y > -TH * 0.95; y -= 3) { const t = -y / TH, w = (7 * (1 - t) + 2 * t) * s; g.fillRect(tx(y) - w / 2, y - 3, w, 3.4); }
+  g.fillStyle = BG;
+  for (let k = 0; k < TH; k++) { const y = -R() * TH * 0.95, w = (7 - 5 * (-y / TH)) * s; g.globalAlpha = 0.5; g.fillRect(tx(y) + (R() - .5) * w, y, 1, 1.6); }
+  g.globalAlpha = 1;
+
+  const y0 = -0.24 * TH, y1 = -0.99 * TH;
+  const hw = y => { const t = (y - y0) / (y1 - y0); return HW * Math.pow(Math.max(0.02, Math.sin(Math.PI * (0.12 + 0.86 * t))), 0.55) * (1 - 0.25 * t); };
+  // miolo da copa
+  g.fillStyle = INK;
+  const nb = Math.floor(0.25 * TH * TH * 1.4);
+  for (let k = 0; k < nb; k++) {
+    const y = y0 - 0.03 * TH + R() * (y1 - y0 + 0.02 * TH), h = hw(y) * 0.78;
+    g.globalAlpha = 0.5 + R() * 0.5; g.fillRect(tx(y) + (R() * 2 - 1) * h, y, 1.5, 1.5);
+  }
+  g.globalAlpha = 1;
+  // tufos em zigue-zague, de baixo para cima
+  const n = 8, tiers = [];
+  for (let i = 0; i < n; i++) {
+    const y = y0 + (i + 0.5) / n * (y1 - y0) + (R() - .5) * 0.02 * TH, h = hw(y), side = i % 2 ? 1 : -1, x = tx(y);
+    const puffs = [[x - side * h * 0.3, y - h * 0.2, h * (0.45 + R() * 0.12)], [x + side * h * (0.32 + R() * 0.1), y, h * (0.66 + R() * 0.1)]];
+    for (const [px, py, r] of puffs) {
+      shade(g, R, px, py, r); disc(g, R, px, py, r * 0.96, 2.3, INK, 0.55);
+      const m = 2 + R() * 3 | 0;
+      for (let k = 0; k < m; k++) { const a = R() * 6.28, rr = r * (0.18 + R() * 0.2); disc(g, R, px + Math.cos(a) * r * 0.9, py + Math.sin(a) * r * 0.85, rr, 2.3, INK, 0.5); }
+    }
+    tiers.push({ x: x + side * h * 0.98, y, side });
+  }
+  const ht = hw(y1 + 0.03 * TH);
+  shade(g, R, 0, y1 + 0.05 * TH, ht * 1.3); disc(g, R, tx(y1), y1 + 0.05 * TH, ht * 1.25, 2.3, INK, 0.55);
+  // bolsões escuros
+  for (let k = 0; k < 14; k++) {
+    const y = y0 + (0.08 + R() * 0.84) * (y1 - y0), h = hw(y);
+    let hx = tx(y) + (R() * 2 - 1) * h * 0.55, hy = y, ha = R() * 6.28;
+    const m = 2 + R() * 4 | 0;
+    for (let j = 0; j < m; j++) { disc(g, R, hx, hy, (2 + R() * 5) * s, 1.7, BG, 0.45); ha += (R() - .5) * 1.5; hx += Math.cos(ha) * 5 * s; hy += Math.sin(ha) * 4 * s; }
+  }
+  const anchors = { contato: tiers[6], projetos: tiers[5], formacao: tiers[2], sobre: tiers[1] };
+  return { c, ox, oy, cw, ch, TH, s, anchors };
+}
+
+function buildRoots(s) {
+  const R = rng(31), RW = 560 * s, RH = 280 * s;
+  const [c, g] = mk(RW, RH);
+  g.translate(RW / 2, 0); g.strokeStyle = '#bebdc6'; g.lineCap = 'round'; g.lineJoin = 'round';
+  function root(x, y, a, len, w, d) {
+    const steps = Math.max(3, len / 5 | 0);
+    g.lineWidth = Math.max(0.5, w); g.beginPath(); g.moveTo(x, y);
+    for (let i = 0; i < steps; i++) {
+      a += (R() - .5) * 0.55; a = Math.max(0.2, Math.min(Math.PI - 0.2, a));
+      x += Math.cos(a) * len / steps; y += Math.sin(a) * len / steps; g.lineTo(x, y);
+    }
+    g.stroke();
+    if (d > 0) { const kids = 2 + (R() < .4 ? 1 : 0); for (let k = 0; k < kids; k++) root(x, y, a + (R() - .5) * 1.3, len * (0.55 + R() * 0.2), w * 0.62, d - 1); }
+  }
+  for (let i = 0; i < 6; i++) root((R() - .5) * 6 * s, 0, Math.PI / 2 + (i - 2.5) * 0.36 + (R() - .5) * 0.2, (55 + R() * 40) * s, 3.4 * s, 4);
+  return { c, RW, RH };
+}
+
+function buildBranch() {
+  const a = tree.anchors.projetos, s = tree.s, R = rng(23);
+  const L = Math.min(W * (narrow ? 0.72 : 0.58), 680);
+  const sx = a.x - 16 * s, sy = a.y + 2, N = 90, path = [];
+  for (let i = 0; i <= N; i++) { const t = i / N; path.push([sx + t * L, sy - t * L * 0.1 + Math.sin(t * 7.5) * 9 * Math.min(1, t * 3)]); }
+  const ys = path.map(p => p[1]);
+  const x0 = sx - 10, x1 = sx + L + 60, y0 = Math.min(...ys) - 70, y1 = Math.max(...ys) + 70;
+  const bw = x1 - x0, bh = y1 - y0;
+  const [c, g] = mk(bw, bh);
+  g.translate(-x0, -y0); g.strokeStyle = INK; g.lineCap = 'round';
+  for (let i = 0; i < N; i++) { const t = i / N; g.lineWidth = (2.6 - 1.8 * t) * s + 0.6; g.beginPath(); g.moveTo(...path[i]); g.lineTo(...path[i + 1]); g.stroke(); }
+  const at = t => path[Math.round(t * N)];
+  for (let t = 0.03; t < 0.98; t += 0.035 + R() * 0.03) {
+    const p = at(t), off = (R() < .5 ? -1 : 1) * (4 + R() * 8);
+    blob(g, R, p[0] + (R() - .5) * 8, p[1] + off, Math.max(4, (6 + R() * 7) * s * (1.1 - 0.5 * t)), 2.0);
+  }
+  const nodes = PROJETOS.map((pr, k) => {
+    const t = 0.16 + k * (0.78 / (PROJETOS.length - 1)), p = at(t), dir = k % 2 ? 1 : -1;
+    const ex = p[0] + 14, ey = p[1] + dir * 26;
+    g.lineWidth = 1.1; g.beginPath(); g.moveTo(p[0], p[1]); g.quadraticCurveTo(p[0] + 2, p[1] + dir * 14, ex, ey); g.stroke();
+    blob(g, R, ex, ey, 7 * s + 3, 2.2);
+    return { x: ex, y: ey, dir, t: (ex - x0) / bw };
+  });
+  return { c, x0, y0, w: bw, h: bh, nodes, prog: branch ? branch.prog : 0 };
+}
+
+function buildGrass() {
+  const R = rng(11), out = [];
+  for (let x = -2600; x < 2600;) {
+    const near = Math.abs(x) < 150;
+    x += near ? 0.7 + R() * 1.4 : 1.8 + R() * 4.5;
+    let h = R() < 0.5 ? 2 + R() * 6 : 6 + R() * 13;
+    if (near) h *= 1.5;
+    const b = { x, h, lean: (R() - .5) * h * 0.55, ph: R() * 6.28 };
+    if (R() < (near ? 0.06 : 0.028)) {
+      b.h = 22 + R() * 34; b.lean = (R() - .5) * 12; b.dots = [];
+      if (R() < 0.55) { b.type = 'spike'; const m = 9 + R() * 9 | 0; for (let k = 0; k < m; k++) b.dots.push([0.62 + 0.38 * k / m, (k % 2 ? 1 : -1) * (1.2 + R() * 1.6)]); }
+      else { b.type = 'puff'; const r = 2.5 + R() * 2.8, m = 14 + R() * 12 | 0; for (let k = 0; k < m; k++) { const a = R() * 6.28, d = r * (0.4 + R() * 0.6); b.dots.push([Math.cos(a) * d, Math.sin(a) * d]); } }
+    }
+    out.push(b);
+  }
+  const gd = []; for (let i = 0; i < 11000; i++) gd.push([-2600 + R() * 5200, R() * R() * 7]);
+  for (let k = 0; k < 40; k++) {
+    const cx = k < 8 ? (R() - .5) * 260 : -2600 + R() * 5200, r = 4 + R() * 9, m = r * r * 1.6;
+    for (let j = 0; j < m; j++) { const a = Math.PI + R() * Math.PI, d = Math.sqrt(R()) * r; gd.push([cx + Math.cos(a) * d * 1.4, Math.sin(a) * d + 2]); }
+  }
+  return [out, gd];
+}
+
+function buildStars() {
+  const R = rng(5), out = [];
+  for (let i = 0; i < 230; i++) out.push({ x: R(), y: R(), s: R() < 0.08 ? 1.6 : 1, ph: R() * 6.28, sp: 0.6 + R() * 1.6 });
+  return out;
+}
+
+function buildGrain() {
+  const [c] = [document.createElement('canvas')]; c.width = c.height = 160;
+  const g = c.getContext('2d'), im = g.createImageData(160, 160), R = rng(3);
+  for (let i = 0; i < im.data.length; i += 4) { const v = R() < .5 ? 255 : 0; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = R() * 110; }
+  g.putImageData(im, 0, 0);
+  return ctx.createPattern(c, 'repeat');
+}
+
+function buildPull(k) {
+  const a = tree.anchors[k], s = tree.s, side = a.side, R = rng(41 + k.length * 7);
+  const L = (narrow ? 70 : 130) * s + 20, sx = a.x - side * 34 * s, sy = a.y, N = 40, path = [];
+  for (let i = 0; i <= N; i++) { const t = i / N; path.push([sx + side * t * (L + 34 * s), sy - t * L * 0.2 + Math.sin(t * 5) * 5 * t]); }
+  const xs = path.map(p => p[0]), ys = path.map(p => p[1]), pad = 40 * s + 10;
+  const x0 = Math.min(...xs) - pad, y0 = Math.min(...ys) - pad, bw = Math.max(...xs) + pad - x0, bh = Math.max(...ys) + pad - y0;
+  const [c, g] = mk(bw, bh);
+  g.translate(-x0, -y0); g.strokeStyle = INK; g.lineCap = 'round';
+  for (let i = 0; i < N; i++) { const t = i / N; g.lineWidth = (2.4 - 1.4 * t) * s + 0.6; g.beginPath(); g.moveTo(...path[i]); g.lineTo(...path[i + 1]); g.stroke(); }
+  for (let t = 0.22; t < 0.97; t += 0.1 + R() * 0.06) {
+    const p = path[Math.round(t * N)], r = (7 + R() * 7) * s * (1.15 - 0.45 * t) + 2;
+    const px = p[0] + (R() - .5) * 10, py = p[1] + (R() - .5) * 18;
+    shade(g, R, px, py, r); disc(g, R, px, py, r, 2.3, INK, 0.55);
+  }
+  const e = path[Math.round(0.88 * N)];
+  disc(g, R, e[0], e[1] - 4 * s, 12 * s + 3, 2.3, INK, 0.55);
+  const tip = path[N];
+  return { c, x0, y0, w: bw, h: bh, prog: pulls && pulls[k] ? pulls[k].prog : 0, tip: { x: tip[0] + side * 4, y: tip[1] }, side };
+}
+
+function layoutPanel(k) {
+  if (narrow || !pulls[k]) return;
+  const p = document.getElementById('p-' + k), pl = pulls[k], l = labels.find(x => x.k === k);
+  const tx = W / 2 - tgt.x + pl.tip.x, ty = H / 2 - tgt.y + pl.tip.y;
+  p.style.top = Math.max(H * 0.3, Math.min(H * 0.7, ty)) + 'px';
+  if (pl.side > 0) { p.style.left = (tx + 20 + l.w + 48) + 'px'; }
+  else { const lim = tx - 20 - l.w - 48, left = Math.max(W * 0.05, lim - 400); p.style.left = left + 'px'; p.style.maxWidth = (lim - left) + 'px'; }
+}
+
+function targets(k) {
+  const home = { x: narrow ? 0 : W * 0.1, y: 34 - H / 2 };
+  switch (k) {
+    case 'sobre': return { x: narrow ? -W * 0.32 : W * 0.34, y: home.y + tree.s * 210 };
+    case 'projetos': return { x: narrow ? W * 0.36 : W * 0.34, y: home.y };
+    case 'formacao': return { x: narrow ? -W * 0.32 : -W * 0.25, y: home.y };
+    case 'contato': return { x: narrow ? -W * 0.32 : -W * 0.22, y: home.y - H * 0.1 };
+    default: return home;
+  }
+}
+const PANEL_POS = { sobre: [0.37, 0.36], formacao: [0.1, 0.5], contato: [0.46, 0.5], projetos: [0.3, 0.8] };
+
+function build() {
+  const r = frameEl.getBoundingClientRect();
+  W = r.width; H = r.height; DPR = Math.min(2, window.devicePixelRatio || 1); narrow = W < 760;
+  cvs.width = W * DPR; cvs.height = H * DPR;
+  tree = buildTree(); roots = buildRoots(tree.s); branch = buildBranch();
+  [grass, ground] = buildGrass(); stars = buildStars(); grain = buildGrain();
+  Object.assign(tgt, targets(state));
+  if (!cam.init) { Object.assign(cam, tgt); cam.init = 1; }
+  for (const [k, [px, py]] of Object.entries(PANEL_POS)) { const p = document.getElementById('p-' + k); p.style.left = W * px + 'px'; p.style.top = H * py + 'px'; }
+  document.getElementById('p-formacao').style.maxWidth = Math.min(380, W * 0.42) + 'px';
+  labels.forEach(l => { l.w = l.el.offsetWidth; l.h = l.el.offsetHeight; });
+  plabels.forEach(l => { l.w = l.el.offsetWidth; l.h = l.el.offsetHeight; });
+  const np = {}; for (const kk of ['sobre', 'formacao', 'contato']) np[kk] = buildPull(kk); pulls = np;
+  layoutPanel(state);
+}
+
+/* ---------- DOM ---------- */
+const labels = [...document.querySelectorAll('.lbl')].map(el => ({ el, k: el.dataset.k, f: 0 }));
+labels.forEach(l => l.el.addEventListener('click', () => go(state === l.k ? 'home' : l.k)));
+const plabels = PROJETOS.map((p, i) => {
+  const el = document.createElement(p.url ? 'button' : 'span'); el.className = 'plbl' + (p.url ? '' : ' txt'); el.textContent = p.nome;
+  if (p.url) el.addEventListener('click', e => { e.stopPropagation(); sel = sel === i ? -1 : i; updCard(); });
+  frameEl.appendChild(el); return { el, f: 0 };
+});
+const pcard = document.getElementById('pcard');
+function updCard() {
+  plabels.forEach((l, i) => l.el.classList.toggle('on', i === sel));
+  if (sel < 0) { pcard.classList.remove('on'); return; }
+  pcard.querySelector('b').textContent = PROJETOS[sel].nome;
+  pcard.querySelector('span').textContent = PROJETOS[sel].desc;
+  pcard.querySelector('a').href = PROJETOS[sel].url;
+  pcard.classList.add('on');
+}
+const ph = document.getElementById('photos');
+FOTOS.forEach(f => {
+  const d = document.createElement('div'); d.className = 'ph';
+  if (f.src) { const im = new Image(); im.src = f.src; im.alt = f.legenda; d.appendChild(im); } else d.append('sua foto aqui');
+  const cap = document.createElement('span'); cap.className = 'cap'; cap.textContent = f.legenda; d.appendChild(cap);
+  ph.appendChild(d);
+});
+document.querySelectorAll('[data-link]').forEach(a => { a.href = LINKS[a.dataset.link]; if (a.href.startsWith('http')) a.target = '_blank'; });
+const back = document.querySelector('.back'), hint = document.getElementById('hint');
+back.addEventListener('click', () => go('home'));
+cvs.addEventListener('click', () => { if (sel >= 0) { sel = -1; updCard(); } });
+addEventListener('keydown', e => { if (e.key === 'Escape') go('home'); });
+
+function go(k, fromHash) {
+  if (!['sobre', 'projetos', 'formacao', 'contato'].includes(k)) k = 'home';
+  state = k; sel = -1; updCard();
+  Object.assign(tgt, targets(k));
+  layoutPanel(k);
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + k));
+  labels.forEach(l => l.el.classList.toggle('on', l.k === k));
+  back.classList.toggle('on', k !== 'home');
+  if (!fromHash) { try { if (k === 'home') history.replaceState(null, '', location.pathname + location.search); else location.hash = k; } catch (e) { } }
+}
+addEventListener('hashchange', () => go(location.hash.slice(1), true));
+
+/* ---------- música ---------- */
+const audio = new Audio(); audio.preload = 'none';
+let mi = 0, started = false;
+const mtitle = document.getElementById('mtitle'), mico = document.getElementById('mico'), mbar = document.getElementById('mbar'), mlink = document.getElementById('mlink');
+function showTrack() {
+  const m = MUSICAS[mi];
+  mtitle.textContent = m.titulo + ' · ' + m.artista;
+  mlink.href = m.link || 'https://music.youtube.com/search?q=' + encodeURIComponent(m.titulo + ' ' + m.artista);
+}
+function playTrack(i) {
+  mi = (i + MUSICAS.length) % MUSICAS.length; showTrack(); started = true;
+  audio.src = MUSICAS[mi].src; audio.play().catch(() => { });
+}
+function setIcon() { mico.setAttribute('d', audio.paused ? 'M1 .5v10l8.5-5z' : 'M1 .5h3v10H1zM6 .5h3v10H6z'); }
+document.getElementById('mplay').addEventListener('click', () => { if (!started) playTrack(mi); else if (audio.paused) audio.play().catch(() => { }); else audio.pause(); });
+document.getElementById('mnext').addEventListener('click', () => playTrack(mi + 1));
+audio.addEventListener('play', setIcon); audio.addEventListener('pause', setIcon);
+audio.addEventListener('ended', () => playTrack(mi + 1));
+audio.addEventListener('timeupdate', () => { mbar.style.width = (audio.duration ? audio.currentTime / audio.duration * 100 : 0) + '%'; });
+showTrack();
+
+/* ---------- render ---------- */
+const easeOut = x => 1 - Math.pow(1 - x, 3);
+function twig(x1, y1, x2, y2, a) {
+  ctx.globalAlpha = a * 0.9; ctx.strokeStyle = ctx.fillStyle = INK; ctx.lineWidth = 1.1;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  [[0.5, 1], [0.72, -1], [0.86, 1]].forEach(([f, sd]) => {
+    const x = x1 + (x2 - x1) * f, y = y1 + (y2 - y1) * f;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang + sd * 0.7);
+    ctx.beginPath(); ctx.ellipse(3, 0, 3.2, 1.4, 0, 0, 6.283); ctx.fill(); ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now; T += dt;
+  const k = 1 - Math.exp(-dt * 3);
+  cam.x += (tgt.x - cam.x) * k; cam.y += (tgt.y - cam.y) * k;
+  intro = Math.min(1, intro + dt / 2.4);
+  const bt = state === 'projetos' ? 1 : 0;
+  branch.prog = bt ? Math.min(1, branch.prog + dt / 1.6) : Math.max(0, branch.prog - dt / 0.5);
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  const X0 = W / 2 - cam.x, Y0 = H / 2 - cam.y;
+
+  // estrelas
+  ctx.fillStyle = INK;
+  const SW = W * 1.6, SH = H * 1.4;
+  for (const st of stars) {
+    let x = (st.x * SW - cam.x * 0.15) % SW; if (x < 0) x += SW; x -= W * 0.3;
+    const y = st.y * SH - (cam.y + H / 2) * 0.12 - H * 0.2;
+    ctx.globalAlpha = 0.18 + 0.32 * (0.5 + 0.5 * Math.sin(T * st.sp + st.ph));
+    ctx.fillRect(x, y, st.s, st.s);
+  }
+  ctx.globalAlpha = 1;
+
+  // raízes
+  ctx.globalAlpha = 0.85 * easeOut(intro);
+  ctx.drawImage(roots.c, X0 - roots.RW / 2, Y0, roots.RW, roots.RH);
+  ctx.globalAlpha = 1;
+
+  // árvore com vento
+  const skew = reduce ? 0 : Math.sin(T * 0.7) * 0.010 + Math.sin(T * 1.9 + 1) * 0.004;
+  const ip = easeOut(intro);
+  ctx.save(); ctx.translate(X0, Y0); ctx.transform(1, 0, skew, 1, 0, 0);
+  ctx.beginPath(); ctx.rect(-3000, -(tree.TH + 80) * ip - 10, 6000, (tree.TH + 80) * ip + 20); ctx.clip();
+  ctx.drawImage(tree.c, -tree.ox, -tree.oy, tree.cw, tree.ch);
+  ctx.restore();
+
+  // galho dos projetos
+  if (branch.prog > 0) {
+    ctx.save(); ctx.translate(X0, Y0); ctx.transform(1, 0, skew, 1, 0, 0);
+    ctx.beginPath(); ctx.rect(branch.x0, branch.y0, branch.w * easeOut(branch.prog), branch.h); ctx.clip();
+    ctx.drawImage(branch.c, branch.x0, branch.y0, branch.w, branch.h);
+    ctx.restore();
+  }
+
+  // galhos puxados das seções
+  for (const [pk, pl] of Object.entries(pulls)) {
+    pl.prog = state === pk ? Math.min(1, pl.prog + dt / 1.1) : Math.max(0, pl.prog - dt / 0.5);
+    if (pl.prog <= 0) continue;
+    const pw = pl.w * easeOut(pl.prog);
+    ctx.save(); ctx.translate(X0, Y0); ctx.transform(1, 0, skew, 1, 0, 0);
+    ctx.beginPath(); ctx.rect(pl.side > 0 ? pl.x0 : pl.x0 + pl.w - pw, pl.y0, pw, pl.h); ctx.clip();
+    ctx.drawImage(pl.c, pl.x0, pl.y0, pl.w, pl.h);
+    ctx.restore();
+  }
+
+  // grama, flores e chão
+  const gy = Y0 + 2, wind = reduce ? 0 : Math.sin(T * 0.7) * 2;
+  ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.globalAlpha = 0.9; ctx.beginPath();
+  const tips = [];
+  for (const b of grass) {
+    const sx = b.x + X0; if (sx < -80 || sx > W + 80) continue;
+    const sw = reduce ? 0 : Math.sin(T * 1.4 + b.x * 0.013 + b.ph * 0.3) * b.h * 0.07 + wind * b.h / 30;
+    const tx = sx + b.lean + sw, ty = gy - b.h, qx = sx + b.lean * 0.2, qy = gy - b.h * 0.6;
+    ctx.moveTo(sx, gy); ctx.quadraticCurveTo(qx, qy, tx, ty);
+    if (b.dots) tips.push([b, sx, gy, qx, qy, tx, ty]);
+  }
+  ctx.stroke();
+  ctx.fillStyle = INK; ctx.globalAlpha = 1;
+  for (const [b, x0, y0, qx, qy, x2, y2] of tips) {
+    if (b.type === 'spike') for (const [t, o] of b.dots) { const u = 1 - t; ctx.fillRect(u * u * x0 + 2 * u * t * qx + t * t * x2 + o - 0.8, u * u * y0 + 2 * u * t * qy + t * t * y2, 1.9, 1.5); }
+    else for (const [dx, dy] of b.dots) ctx.fillRect(x2 + dx, y2 + dy, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 0.6;
+  for (const [x, y] of ground) { const sx = x + X0; if (sx > -2 && sx < W + 2) ctx.fillRect(sx, gy + y - 1, 1.2, 1.2); }
+  ctx.globalAlpha = 1;
+
+  // rótulos dos galhos
+  const gap = narrow ? 34 : 64;
+  for (const l of labels) {
+    let a = tree.anchors[l.k], lg = gap;
+    const pl = pulls[l.k];
+    if (pl && pl.prog > 0) { const e = easeOut(pl.prog); a = { x: a.x + (pl.tip.x - a.x) * e, y: a.y + (pl.tip.y - a.y) * e, side: a.side }; lg = gap + (20 - gap) * e; }
+    const vis = (state === 'home' && intro > 0.92) || (state === l.k && l.k !== 'projetos');
+    l.f += ((vis ? 1 : 0) - l.f) * Math.min(1, k * 2.2);
+    const ax = X0 + a.x + skew * a.y, ay = Y0 + a.y;
+    const cx = ax + a.side * (lg + l.w / 2), cy = ay - 10 * (lg / gap);
+    l.el.style.opacity = l.f.toFixed(3);
+    l.el.style.pointerEvents = l.f > 0.5 ? 'auto' : 'none';
+    l.el.style.transform = `translate3d(${(cx - l.w / 2).toFixed(1)}px,${(cy - l.h / 2).toFixed(1)}px,0)`;
+    if (l.f > 0.02) twig(cx - a.side * (l.w / 2 + 8), cy + 1, ax, ay + 2, l.f);
+  }
+
+  // rótulos dos projetos
+  branch.nodes.forEach((n, i) => {
+    const l = plabels[i];
+    const vis = state === 'projetos' && easeOut(branch.prog) > n.t + 0.02;
+    l.f += ((vis ? 1 : 0) - l.f) * Math.min(1, k * 2.5);
+    const nx = X0 + n.x + skew * n.y, ny = Y0 + n.y;
+    const cy = ny + n.dir * 22;
+    l.el.style.opacity = l.f.toFixed(3);
+    l.el.style.pointerEvents = l.f > 0.5 ? 'auto' : 'none';
+    l.el.style.transform = `translate3d(${(nx - l.w / 2).toFixed(1)}px,${(cy - l.h / 2).toFixed(1)}px,0)`;
+    if (i === sel) {
+      const cw = pcard.offsetWidth, ch = pcard.offsetHeight;
+      const left = Math.max(12, Math.min(W - cw - 12, nx - 30));
+      const top = n.dir < 0 ? cy - 18 - ch : cy + 18;
+      pcard.style.transform = `translate3d(${left.toFixed(1)}px,${top.toFixed(1)}px,0)`;
+    }
+  });
+
+  hint.classList.toggle('on', state === 'home' && intro > 0.98);
+
+  // granulado
+  ctx.save(); ctx.globalAlpha = 0.07; ctx.fillStyle = grain;
+  const gx = reduce ? 0 : Math.random() * 160 | 0, gy2 = reduce ? 0 : Math.random() * 160 | 0;
+  ctx.translate(-gx, -gy2); ctx.fillRect(0, 0, W + gx, H + gy2); ctx.restore();
+
+  requestAnimationFrame(frame);
+}
+
+let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
+(document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+  build();
+  go(location.hash.slice(1), true);
+  requestAnimationFrame(t => { last = t; frame(t); });
+});
+</script>
+</body>
+</html>
