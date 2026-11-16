@@ -595,6 +595,7 @@ function frame(now) {
 
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
+  if (location.hash) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { } }
   build();
   go('home');
   requestAnimationFrame(t => { last = t; frame(t); });
