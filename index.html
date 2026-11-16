@@ -422,7 +422,7 @@ FOTOS.forEach(f => {
   if (f.legenda) { const cap = document.createElement('span'); cap.className = 'cap'; cap.textContent = f.legenda; d.appendChild(cap); }
   ph.appendChild(d);
 });
-document.querySelectorAll('[data-link]').forEach(a => { a.href = LINKS[a.dataset.link]; if (a.href.startsWith('http')) a.target = '_blank'; });
+document.querySelectorAll('[data-link]').forEach(a => { const u = LINKS[a.dataset.link]; if (u && u !== '#') { a.href = u; a.target = '_blank'; a.rel = 'noopener'; } else { a.removeAttribute('href'); a.style.cursor = 'default'; } });
 const back = document.querySelector('.back'), hint = document.getElementById('hint');
 back.addEventListener('click', () => go('home'));
 cvs.addEventListener('click', () => { if (sel >= 0) { sel = -1; updCard(); } });
@@ -436,9 +436,7 @@ function go(k, fromHash) {
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + k));
   labels.forEach(l => l.el.classList.toggle('on', l.k === k));
   back.classList.toggle('on', k !== 'home');
-  if (!fromHash) { try { if (k === 'home') history.replaceState(null, '', location.pathname + location.search); else location.hash = k; } catch (e) { } }
 }
-addEventListener('hashchange', () => go(location.hash.slice(1), true));
 
 /* ---------- música ---------- */
 const audio = new Audio(); audio.preload = 'none';
@@ -598,7 +596,7 @@ function frame(now) {
 let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 150); });
 (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => {
   build();
-  go(location.hash.slice(1), true);
+  go('home');
   requestAnimationFrame(t => { last = t; frame(t); });
 });
 </script>
